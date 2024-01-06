@@ -1,5 +1,13 @@
-type Note @model @auth(rules: [{ allow: public }]) {
+type Note
+  @model
+  @auth(
+    rules: [
+      { allow: owner } # only the owner can create, read, update, and delete
+    ]
+  ) {
   id: ID!
   name: String!
   description: String
+  image: String
+  owner: String # Automatically populated with the username of the creator
 }
