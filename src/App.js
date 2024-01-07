@@ -1,5 +1,3 @@
-// Put your code below this line.
-
 import React, { useState, useEffect } from 'react';
 import './App.css';
 import '@aws-amplify/ui-react/styles.css';
@@ -7,9 +5,9 @@ import {
   Button,
   Flex,
   Heading,
-  Image,
   Text,
   TextField,
+  Image,
   View,
   withAuthenticator,
 } from '@aws-amplify/ui-react';
@@ -18,7 +16,8 @@ import {
   createNote as createNoteMutation,
   deleteNote as deleteNoteMutation,
 } from './graphql/mutations';
-import { generateClient, Storage } from 'aws-amplify/api';
+import { generateClient } from 'aws-amplify/api';
+import { uploadData, getUrl, remove } from 'aws-amplify/storage';
 
 const client = generateClient();
 
@@ -30,13 +29,13 @@ const App = ({ signOut }) => {
   }, []);
 
   async function fetchNotes() {
-    const apiData = await API.graphql({ query: listNotes });
+    const apiData = await client.graphql({ query: listNotes });
     const notesFromAPI = apiData.data.listNotes.items;
     await Promise.all(
       notesFromAPI.map(async (note) => {
         if (note.image) {
-          const url = await Storage.get(note.name);
-          note.image = url;
+          const url = await getUrl({ key: note.name });
+          note.image = url.url;
         }
         return note;
       })
@@ -53,8 +52,12 @@ const App = ({ signOut }) => {
       description: form.get('description'),
       image: image.name,
     };
-    if (!!data.image) await Storage.put(data.name, image);
-    await API.graphql({
+    if (!!data.image)
+      await uploadData({
+        key: data.name,
+        data: image,
+      });
+    await client.graphql({
       query: createNoteMutation,
       variables: { input: data },
     });
@@ -65,8 +68,8 @@ const App = ({ signOut }) => {
   async function deleteNote({ id, name }) {
     const newNotes = notes.filter((note) => note.id !== id);
     setNotes(newNotes);
-    await Storage.remove(name);
-    await API.graphql({
+    await remove({ key: name });
+    await client.graphql({
       query: deleteNoteMutation,
       variables: { input: { id } },
     });

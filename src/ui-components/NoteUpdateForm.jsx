@@ -28,14 +28,12 @@ export default function NoteUpdateForm(props) {
     name: "",
     description: "",
     image: "",
-    owner: "",
   };
   const [name, setName] = React.useState(initialValues.name);
   const [description, setDescription] = React.useState(
     initialValues.description
   );
   const [image, setImage] = React.useState(initialValues.image);
-  const [owner, setOwner] = React.useState(initialValues.owner);
   const [errors, setErrors] = React.useState({});
   const resetStateValues = () => {
     const cleanValues = noteRecord
@@ -44,7 +42,6 @@ export default function NoteUpdateForm(props) {
     setName(cleanValues.name);
     setDescription(cleanValues.description);
     setImage(cleanValues.image);
-    setOwner(cleanValues.owner);
     setErrors({});
   };
   const [noteRecord, setNoteRecord] = React.useState(noteModelProp);
@@ -67,7 +64,6 @@ export default function NoteUpdateForm(props) {
     name: [{ type: "Required" }],
     description: [],
     image: [],
-    owner: [],
   };
   const runValidationTasks = async (
     fieldName,
@@ -98,7 +94,6 @@ export default function NoteUpdateForm(props) {
           name,
           description: description ?? null,
           image: image ?? null,
-          owner: owner ?? null,
         };
         const validationResponses = await Promise.all(
           Object.keys(validations).reduce((promises, fieldName) => {
@@ -162,7 +157,6 @@ export default function NoteUpdateForm(props) {
               name: value,
               description,
               image,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.name ?? value;
@@ -189,7 +183,6 @@ export default function NoteUpdateForm(props) {
               name,
               description: value,
               image,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.description ?? value;
@@ -216,7 +209,6 @@ export default function NoteUpdateForm(props) {
               name,
               description,
               image: value,
-              owner,
             };
             const result = onChange(modelFields);
             value = result?.image ?? value;
@@ -230,33 +222,6 @@ export default function NoteUpdateForm(props) {
         errorMessage={errors.image?.errorMessage}
         hasError={errors.image?.hasError}
         {...getOverrideProps(overrides, "image")}
-      ></TextField>
-      <TextField
-        label="Owner"
-        isRequired={false}
-        isReadOnly={false}
-        value={owner}
-        onChange={(e) => {
-          let { value } = e.target;
-          if (onChange) {
-            const modelFields = {
-              name,
-              description,
-              image,
-              owner: value,
-            };
-            const result = onChange(modelFields);
-            value = result?.owner ?? value;
-          }
-          if (errors.owner?.hasError) {
-            runValidationTasks("owner", value);
-          }
-          setOwner(value);
-        }}
-        onBlur={() => runValidationTasks("owner", owner)}
-        errorMessage={errors.owner?.errorMessage}
-        hasError={errors.owner?.hasError}
-        {...getOverrideProps(overrides, "owner")}
       ></TextField>
       <Flex
         justifyContent="space-between"
